@@ -11,10 +11,21 @@ public class TvMain {
 		try {
 			TV tv = factory.getBrand("samsung");
 			tv.turnOn();
+			//System.exit(1);
+			System.out.println(tempFunc());
 		} catch (NullPointerException e) {
 			System.out.println(e);
+		} finally {
+			System.out.println("bye~~");
 		}
 	}
-
+	public static int tempFunc() {
+		try {
+			return 1;
+		} finally {
+			return 2;
+		}
+		
+	}
 }
 
