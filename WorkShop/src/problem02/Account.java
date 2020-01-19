@@ -15,6 +15,10 @@ public class Account {
 		this.interestRate = interestRate;
 	}
 	
+	public double getRate() {
+		return this.interestRate;
+	}
+	
 	public double calInterest() {
 		return this.balance * this.interestRate;
 	}
@@ -31,6 +35,6 @@ public class Account {
 		}
 	}
 	public void getInfo() {
-		System.out.println("계좌정보: " + account + " 현재잔액: " + balance);
+		System.out.print("계좌정보: " + account + " 현재잔액: " + balance);
 	}
 }
