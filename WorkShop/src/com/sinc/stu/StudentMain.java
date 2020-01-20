@@ -41,7 +41,36 @@ public class StudentMain {
 				.collect(Collectors
 						.maxBy(Comparator.comparingInt(StuVO::getAge)))
 				.get()).getName());
-
+		
+		System.out.println("나이가 가장 적은 학생: "
+				+ (StuAry.stream()
+				.collect(Collectors
+						.minBy(Comparator.comparingInt(StuVO::getAge)))
+				.get()).getName());
+		
+		System.out.println("신장이 가장 큰 학생: "
+				+ (StuAry.stream()
+				.collect(Collectors
+						.maxBy(Comparator.comparingInt(StuVO::getHeight)))
+				.get()).getName());
+		
+		System.out.println("신장이 가장 작은 학생: "
+				+ (StuAry.stream()
+				.collect(Collectors
+						.minBy(Comparator.comparingInt(StuVO::getHeight)))
+				.get()).getName());
+		
+		System.out.println("몸무게가 가장 무거운 학생: "
+				+ (StuAry.stream()
+				.collect(Collectors
+						.maxBy(Comparator.comparingInt(StuVO::getWeight)))
+				.get()).getName());
+		
+		System.out.println("몸무게가 가장 가벼운 학생: "
+				+ (StuAry.stream()
+				.collect(Collectors
+						.minBy(Comparator.comparingInt(StuVO::getWeight)))
+				.get()).getName());
 	}
 
 }
