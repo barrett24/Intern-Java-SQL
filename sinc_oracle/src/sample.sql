@@ -135,12 +135,11 @@ WHERE	DEPT_ID = '20'
 OR		DEPT_ID = '90'
 AND		SALARY > 3000000;
 ----------------------------------------------------------
-
 SELECT 	LENGTH(CHARTYPE),
 		LENGTH(VARCHARTYPE) -- 문자열의 갯수 반환
 FROM	COLUMN_LENGTH;
 SELECT * FROM COLUMN_LENGTH;
-
+----------------------------------------------------------
 SELECT * FROM EMPLOYEE;
 
 SELECT	EMAIL,
@@ -150,38 +149,38 @@ FROM EMPLOYEE;
 SELECT	EMAIL,
 		INSTR(EMAIL, 'c', INSTR(EMAIL, '.')-1) AS 위치
 FROM	EMPLOYEE;
-
+----------------------------------------------------------
 SELECT	EMAIL AS 원본데이터,
 		LENGTH(EMAIL) AS 원본길이,
 		RPAD(EMAIL, 20, '.') AS 적용결과,
 		LENGTH(LPAD(EMAIL, 20, '.')) AS 결과길이
 FROM	EMPLOYEE;
-
+----------------------------------------------------------
 SELECT LTRIM('...tech') FROM DUAL;
 SELECT LTRIM('   tech', '.') FROM DUAL;
 SELECT LTRIM('000123', '123') FROM DUAL;
 SELECT LTRIM('123123Tech123', '123') FROM DUAL;
-
+----------------------------------------------------------
 SELECT TRIM('   tech   ') FROM DUAL;
 SELECT TRIM('a' FROM 'aatechaaa') FROM DUAL;
 SELECT TRIM(LEADING '0' FROM '00123') FROM DUAL;
 SELECT TRIM(TRAILING '1' FROM 'Tech1') FROM DUAL;
 SELECT TRIM(BOTH '1' FROM '1Tech111') FROM DUAL;
-
+----------------------------------------------------------
 SELECT SUBSTR('THIS IS A TEST', 6, 2) FROM DUAL;
 SELECT SUBSTR('THIS IS A TEST', 6) FROM DUAL;
 SELECT SUBSTR('THIS IS A TEST', -3, 3) FROM DUAL;
-
+----------------------------------------------------------
 SELECT ROUND(125.315, 1) FROM DUAL;
 SELECT ROUND(125.315, -1) FROM DUAL;
-
+----------------------------------------------------------
 SELECT TRUNC(125.315, 1) FROM DUAL;
-
+----------------------------------------------------------
 SELECT	EMP_NAME,
 		HIRE_DATE,
 		ADD_MONTHS(HIRE_DATE, 240) -- 2년
 FROM	EMPLOYEE;
-
+----------------------------------------------------------
 SELECT	EMP_NAME, 
 		HIRE_DATE, 
 		DEPT_ID, 
@@ -190,6 +189,249 @@ SELECT	EMP_NAME,
 		DEPT_ID AS 부서
 FROM	EMPLOYEE
 WHERE	MONTHS_BETWEEN(SYSDATE, HIRE_DATE) >= 240;
+----------------------------------------------------------
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+WHERE EMP_ID = 100; -- 묵시적 형변환 (100이 바뀌는게 아니라 컴파일러가 칼럼의 값을 바꿈)
+					-- 묵시적 형변환은 시스템 성능저하를 초래하기도 하므로 지양할 것
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+WHERE	EMP_ID = TO_CHAR(100); -- 명시적 형변환
+
+SELECT TO_CHAR(1234, '999999') FROM DUAL;	-- 9는 자릿수 지정
+SELECT TO_CHAR(1234, '09999') FROM DUAL;	-- 남은 자리를 0으로
+SELECT TO_CHAR(1234, 'L99999') FROM DUAL;	-- L 또는 $는 통화기호 표시
+SELECT TO_CHAR(1234, '99,999') FROM DUAL;	-- . 또는 ,는 지정한 위치에 . 또는 , 표시
+SELECT TO_CHAR(1234, '09,999') FROM DUAL;
+SELECT TO_CHAR(1234, '9.9EEEE') FROM DUAL;	-- 과학 지수 표기법
+SELECT TO_CHAR(1234, '999') FROM DUAL;		-- 자릿수가 적으면 에러
+
+SELECT TO_CHAR(SYSDATE, 'PM HH24:MI:SS') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'AM HH:MI:SS') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'MON DY, YYYY') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'YYYY-fmMM-DD DAY') FROM DUAL;	-- FM은 좌우 공백제거
+SELECT TO_CHAR(SYSDATE, 'YYYY-MMfmDD DAY') FROM DUAL;
+SELECT TO_CHAR(SYSDATE, 'Year, Q') FROM DUAL;
+
+SELECT	EMP_NAME AS 이름,
+		TO_CHAR(HIRE_DATE, 'YYYY-MM-DD') AS 입사일
+FROM 	EMPLOYEE
+WHERE	JOB_ID = 'J7';	-- 문자열은 대소문자를 구분한다는 점에 주의할것
+
+SELECT	EMP_NAME AS 이름,
+		TO_CHAR(HIRE_DATE, 'YYYY"년" MM"월" DD"일"') AS 입사일
+FROM EMPLOYEE
+WHERE JOB_ID = 'J7';
+
+SELECT	EMP_NAME AS 이름,
+		SUBSTR(HIRE_DATE, 1,2)||'년 '||		-- DATE형식에서 년의 위치 다시 공부하기
+		SUBSTR(HIRE_DATE, 4,2)||'월 '||
+		SUBSTR(HIRE_DATE, 7,2)||'일 ' AS 입사일
+FROM EMPLOYEE
+WHERE JOB_ID = 'J7';
+
+SELECT	EMP_NAME, HIRE_DATE
+FROM	EMPLOYEE
+WHERE	HIRE_DATE = '04/04/30';
+
+SELECT	EMP_NAME
+FROM	EMPLOYEE
+WHERE	HIRE_DATE = '90/04/01';
+----------------------------------------------------------
+SELECT	TO_DATE('20100101', 'YYYYMMDD') FROM DUAL;
+SELECT	TO_DATE('20100101', 'YYY, MON') FROM DUAL;
+
+SELECT	TO_CHAR(TO_DATE('20100101', 'YYYYMMDD'), 'YYYY, MON')
+FROM	DUAL;
+
+SELECT	TO_DATE('041030 143000', 'YYMMDD HH24MISS') FROM DUAL;
+SELECT	TO_CHAR(TO_DATE('980630', 'YYMMDD'), 'YYYY.MM.DD') FROM DUAL;	-- 2098
+SELECT	TO_CHAR(TO_DATE('980630', 'RRMMDD'), 'YYYY.MM.DD') FROM DUAL;	-- 1998
+
+SELECT	EMP_NAME,
+		EMP_NO,
+		SUBSTR(EMP_NO, 1,6) AS 앞부분,
+		SUBSTR(EMP_NO, 8)	AS 뒷부분,
+		TO_NUMBER(SUBSTR(EMP_NO,1,6)) + TO_NUMBER(SUBSTR(EMP_NO,8)) AS 결과
+FROM	EMPLOYEE
+WHERE	EMP_ID = '101';
+----------------------------------------------------------
+SELECT	RMP_NAME, SALARY, NVL(BONUS_PCT, 0)
+FROM	EMPLOYEE
+WHERE	SALARY > 3500000;
+
+SELECT	EMP_NAME,
+		(SALARY*12)+((SALARY*12)*BONUS_PCT)
+FROM	EMPLOYEE
+WHERE	SALARY > 3500000
+
+SELECT	EMP_NAME,
+		(SALARY*12)+((SALARY*12)*NVL(BONUS_PCT, 0))
+FROM	EMPLOYEE
+WHERE	SALARY > 3500000
+
+SELECT * FROM EMPLOYEE;
+
+SELECT	EMP_NAME,
+		EMP_NO,
+		SALARY,
+		DECODE(SUBSTR(EMP_NO, 8, 1),
+			1, '남자',
+			3, '남자',
+			'여자') AS 성별
+FROM	EMPLOYEE
+WHERE	JOB_ID = 'J7';
+
+SELECT	EMP_NAME,
+		EMP_NO,
+		SALARY,
+		DECODE(SUBSTR(EMP_NO, 8, 1),	-- 필터링이 아닌 논리적 제한을 주는것
+			'2', '여자',
+			'1', '남자',
+			'3', '남자',
+			'4', '여자') AS 성별
+FROM	EMPLOYEE
+WHERE	SUBSTR(EMP_NO, 8, 1) = '2'
+OR		SUBSTR(EMP_NO, 8, 1) = '4';
+
+SELECT	EMP_ID,
+		EMP_NAME,
+		MGR_ID,
+		DECODE(MGR_ID, NULL, '직원', 
+				'관리자') AS 직원구분
+FROM	EMPLOYEE
+WHERE	JOB_ID = 'J4';
+
+SELECT	EMP_ID,
+		EMP_NAME,
+		MGR_ID,
+		NVL2(MGR_ID,'직원', '관리자') AS 직원구분
+FROM	EMPLOYEE
+WHERE	JOB_ID = 'J4';
+
+SELECT	EMP_NAME AS 이름,
+		JOB_ID AS 직급,
+		SALARY AS 급여,
+		DECODE(JOB_ID, 'J7', SALARY * 1.2, 'J6', SALARY*1.15, 'J5', SALARY * 1.05, SALARY) AS 인상급여
+FROM	EMPLOYEE;
+
+SELECT	EMP_NAME AS 이름,
+		JOB_ID AS 직급,
+		SALARY AS 급여,
+		CASE JOB_ID 
+			WHEN 'J7' THEN SALARY * 1.2
+			WHEN 'J6' THEN SALARY * 1.15
+			WHEN 'J5' THEN SALARY * 1.05
+			ELSE SALARY
+			END AS 인상급여
+FROM 	EMPLOYEE;
+
+SELECT	EMP_NAME AS 이름,
+		JOB_ID AS 직급,
+		SALARY AS 급여,
+		CASE WHEN JOB_ID = 'J7' THEN SALARY * 1.2
+			WHEN JOB_ID = 'J6' THEN SALARY * 1.15
+			WHEN JOB_ID = 'J5' THEN SALARY * 1.05
+			ELSE SALARY
+			END AS 인상급여
+FROM 	EMPLOYEE;
+
+--직원들의 급여등급 확인 300이하 초급 400이하 중급 400 이상 고급
+-- 이름 급여 급여등급 출력
+
+SELECT	EMP_NAME AS 이름,
+		SALARY AS 급여,
+		CASE WHEN SALARY <= '3000000' THEN '초급'
+			WHEN SALARY <= '4000000' THEN '중급'
+			ELSE '고급'
+		END AS 급여등급
+FROM	EMPLOYEE;
+
+
+-- 사원 테이블에서 사원의 이름, 메일, 메일 아이디만 조회
+SELECT	EMP_NAME AS 이름,
+		EMAIL AS 메일,
+		SUBSTR(EMAIL, 1, INSTR(EMAIL, '@')-1) AS 메일아이디
+FROM	EMPLOYEE;
+
+----------------------------------------------------------
+----------------------------------------------------------
+SELECT	SUM(SALARY)
+FROM	EMPLOYEE;
+
+SELECT	DEPT_ID AS 부서
+		ROUND(AVG(SALARY), -4) AS 평균급여
+FROM	EMPLOYEE
+GROUP BY 	DEPT_ID
+ORDER BY 1;
+
+SELECT DECODE(SUBSTR(EMP_NO, 8, 1),
+			'1', '남', '3', '남', '여') AS 성별,
+		ROUND(AVG(SALARY), -4) AS 평균급여
+FROM	EMPLOYEE
+GROUP BY DECODE(SUBSTR(EMP_NO, 8, 1), '1', '남', '3', '남', '여') -- 기준으로 하위그룹을 만드는것
+ORDER BY 2;
+
+SELECT	EMP_NAME, DEPT_ID, COUNT(*)
+FROM	EMPLOYEE
+GROUP BY	ROLLUP(EMP_NAME, DEPT_ID);
+
+SELECT * FROM TB_GRADE;
+
+
+SELECT	DEPT_ID,
+		SUM(SALARY)
+FROM	EMPLOYEE
+GROUP BY	DEPT_ID
+HAVING		SUM(SALARY) = ( SELECT	MAX(SUM(SALARY))
+							FROM	EMPLOYEE
+							GROUP BY	DEPT_ID);
+
+
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+SELECT * FROM SAL_GRADE;
+
+
+SELECT	EMP_NAME, DEPT_NAME
+FROM	EMPLOYEE E,
+		DEPARTMENT D
+WHERE	E.DEPT_ID = D.DEPT_ID(+); -- (+)가 붙은 반대쪽 테이블의 모든것을 출력하는 것 <아우터조인>
+
+SELECT	EMP_NAME,
+		SALARY,
+		SLEVEL
+FROM	EMPLOYEE E,
+		SAL_GRADE S
+WHERE	E.SALARY BETWEEN S.LOWEST AND S.HIGHEST;
+
+SELECT	EMP_ID,
+		EMP_NAME,
+		
+
+
+
+SELECT * FROM DEPARTMENT;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
