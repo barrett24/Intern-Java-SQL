@@ -397,13 +397,17 @@ HAVING		SUM(SALARY) = ( SELECT	MAX(SUM(SALARY))
 --------------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------------
 SELECT * FROM SAL_GRADE;
-
-
-SELECT	EMP_NAME, DEPT_NAME
+SELECT * FROM DEPARTMENT;
+--------------------------------------------------------------------------------------------
+SELECT	EMP_NAME, DEPT_NAME			-- 오라클 스타일
 FROM	EMPLOYEE E,
 		DEPARTMENT D
 WHERE	E.DEPT_ID = D.DEPT_ID(+); -- (+)가 붙은 반대쪽 테이블의 모든것을 출력하는 것 <아우터조인>
 
+SELECT	EMP_NAME, DEPT_NAME			-- ANSI 표준
+FROM	EMPLOYEE E
+FULL JOIN	DEPARTMENT D USING(DEPT_ID);	-- 공유하는 키의 칼럼명이 같은경우 USING
+--------------------------------------------------------------------------------------------
 SELECT	EMP_NAME,
 		SALARY,
 		SLEVEL
@@ -411,19 +415,230 @@ FROM	EMPLOYEE E,
 		SAL_GRADE S
 WHERE	E.SALARY BETWEEN S.LOWEST AND S.HIGHEST;
 
+SELECT	EMP_NAME,
+		SALARY,
+		SLEVEL
+FROM	EMPLOYEE E
+JOIN	SAL_GRADE S ON(E.SALARY BETWEEN S.LOWEST AND S.HIGHEST);
+--------------------------------------------------------------------------------------------
+SELECT	DEPT_NAME,
+		LOC_DESCRIBE
+FROM	DEPARTMENT
+JOIN	LOCATION ON (LOC_ID = LOCATION_ID); -- 키를 공유하지만, 이름이 다른 경우 ON사용
+		
+--------------------------------------------------------------------------------------------
+SELECT	E.EMP_NAME AS 직원,
+		M.EMP_NAME AS 관리자
+FROM	EMPLOYEE E
+JOIN	EMPLOYEE M ON (E.MGR_ID = M.EMP_ID)	-- 관리자가 없는 사원은 누락됨
+ORDER BY 1;
+
+SELECT	E.EMP_NAME AS 직원,
+		M.EMP_NAME AS 관리자
+FROM	EMPLOYEE E
+LEFT JOIN	EMPLOYEE M ON (E.MGR_ID = M.EMP_ID)	-- 관리자가 없어도 출력
+ORDER BY 1;
+
+SELECT	E.EMP_NAME AS 직원,
+		M.EMP_NAME AS 관리자2,
+		S.EMP_NAME AS 임원
+FROM	EMPLOYEE E
+JOIN	EMPLOYEE M ON (E.MGR_ID = M.EMP_ID)		-- 늘어난 테이블 만큼 조인하면 된다
+JOIN	EMPLOYEE S ON (M.MGR_ID = S.EMP_ID)		-- 관리자의 관리자를 출력
+ORDER BY 1;
+
+--------------------------------------------------------------------------------------------
+SELECT	E.EMP_NAME,
+		E.SALARY,
+		J.JOB_TITLE,
+		D.DEPT_NAME,
+		S.SLEVEL,
+		L.LOC_DESCRIBE,
+		C.COUNTRY_NAME
+FROM	EMPLOYEE E
+JOIN	JOB J USING (JOB_ID)
+JOIN	DEPARTMENT D USING (DEPT_ID)
+JOIN	SAL_GRADE S ON (E.SALARY BETWEEN S.LOWEST AND S.HIGHEST)
+JOIN	LOCATION L ON (D.LOC_ID = L.LOCATION_ID)
+JOIN	COUNTRY C USING (COUNTRY_ID)
+WHERE	JOB_TITLE = '대리'
+AND 	LOC_DESCRIBE LIKE '아시아%';
+
+--SET------------------------------------------------------------------------------------------
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	EMPLOYEE_ROLE
+MINUS
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	ROLE_HISTORY;
+
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	EMPLOYEE_ROLE
+UNION
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	ROLE_HISTORY;
+
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	EMPLOYEE_ROLE
+UNION ALL
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	ROLE_HISTORY;
+
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	EMPLOYEE_ROLE
+INTERSECT
+SELECT	EMP_ID,
+		ROLE_NAME
+FROM	ROLE_HISTORY;
+
+SELECT	EMP_NAME,
+		JOB_TITLE 직급
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE IN ('대리', '사원')
+ORDER BY 2,1;
+
+SELECT	EMP_NAME, '사원' 직급		-- 위 쿼리를 UNION화 한것
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '사원'
+UNION
+SELECT	EMP_NAME, '대리'
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '대리'
+ORDER BY 2,1;
+
+
+----서브쿼리----------------------------------------------------------------------------------------
+SELECT	EMP_NAME,
+		JOB_ID,
+		SALARY
+FROM	EMPLOYEE
+WHERE	JOB_ID = (  SELECT JOB_ID
+					FROM	EMPLOYEE
+					WHERE	EMP_NAME = '나승원')
+AND		SALARY > (  SELECT	SALARY
+					FROM EMPLOYEE
+					WHERE	EMP_NAME = '나승원');
+
+SELECT	EMP_NAME,
+		JOB_ID,
+		SALARY
+FROM	EMPLOYEE
+WHERE	SALARY = (  SELECT	MIN(SALARY)
+					FROM 	EMPLOYEE);
+
+SELECT		DEPT_NAME,
+			SUM(SALARY),
+FROM		EMPLOYEE
+LEFT JOIN	DEPATMENT USING (DEPT_ID)
+GROUP BY	DEPT_ID, DEPT_NAME
+HAVING		SUM(SALARY) = ( SELECT	 MAX(SUM(SALARY))
+							FROM	 EMPLOYEE
+							GROUP BY DEPT_ID);
+							
+SELECT	EMP_ID,
+		EMP_NAME
+FROM	EMPLOYEE
+WHERE	SALARY = (  SELECT	MIN(SALARY)
+					FROM	EMPLOYEE
+					GROUP BY DEPT_ID);
+
+SELECT	EMP_ID,
+		EMP_NAME
+FROM	EMPLOYEE
+WHERE	(SALARY, DEPT_ID) IN (  SELECT	MIN(SALARY),
+										DEPT_ID			-- 최소급여만 받으면 안되고, 누군지도 같이 보내야한다
+								FROM	EMPLOYEE
+								GROUP BY DEPT_ID);		-- 다중: 괄호와 IN
+--------------------------------------------------------------------------------------------
 SELECT	EMP_ID,
 		EMP_NAME,
-		
+		'관리자' AS 구분
+FROM	EMPLOYEE
+WHERE	EMP_ID IN (SELECT MGR_ID FROM EMPLOYEE)
+UNION
+SELECT	EMP_ID,
+		EMP_NAME,
+		'직원'
+FROM	EMPLOYEE
+WHERE	EMP_ID NOT IN ( SELECT MGR_ID FROM   EMPLOYEE
+						WHERE  MGR_ID IS NOT NULL)
+ORDER BY 3,1;
 
+--ANY, ALL------------------------------------------------------------------------------------------
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '대리'
+AND		SALARY > ANY
+					(   SELECT 	SALARY
+						FROM 	EMPLOYEE
+						JOIN	JOB USING (JOB_ID)
+						WHERE	JOB_TITLE = '과장');
 
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '대리'
+AND		SALARY < ANY
+					(   SELECT 	SALARY
+						FROM 	EMPLOYEE
+						JOIN	JOB USING (JOB_ID)
+						WHERE	JOB_TITLE = '과장');
 
-SELECT * FROM DEPARTMENT;
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '대리'
+AND		SALARY > ALL
+					(   SELECT 	SALARY
+						FROM 	EMPLOYEE
+						JOIN	JOB USING (JOB_ID)
+						WHERE	JOB_TITLE = '과장');
+						
+SELECT	EMP_NAME,
+		SALARY
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	JOB_TITLE = '대리'
+AND		SALARY < ALL
+					(   SELECT 	SALARY
+						FROM 	EMPLOYEE
+						JOIN	JOB USING (JOB_ID)
+						WHERE	JOB_TITLE = '과장');
+--------------------------------------------------------------------------------------------
+--- 직급별 평균급여를 조회하라
+SELECT	EMP_NAME,
+		JOB_TITLE,
+		SALARY
+FROM	EMPLOYEE
+JOIN	JOB USING (JOB_ID)
+WHERE	(JOB_ID, SALARY) IN (   SELECT	JOB_ID,
+										TRUNC(AVG(SALARY), -5)
+								FROM	EMPLOYEE
+								GROUP BY JOB_ID);
 
-
-
-
-
-
+								
+SELECT	E.EMP_NAME,
+		J.JOB_TITLE,
+		SALARY
+FROM	(	SELECT	JOB_ID,
+					TRUNC(AVG(SALARY), -5) JOBAVG
+			FROM	EMPLOYEE
+			GROUP BY JOB_ID) V
+JOIN	EMPLOYEE E ON (E.SALARY = V.JOBAVG AND E.JOB_ID = V.JOB_ID)
+JOIN	JOB J ON (J.JOB_ID = E.JOB_ID);
 
 
 
