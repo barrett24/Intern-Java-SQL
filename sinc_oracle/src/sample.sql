@@ -641,11 +641,25 @@ JOIN	EMPLOYEE E ON (E.SALARY = V.JOBAVG AND E.JOB_ID = V.JOB_ID)
 JOIN	JOB J ON (J.JOB_ID = E.JOB_ID);
 
 
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 
+CREATE TABLE INTERN_USER_TBL(
+	ID		VARCHAR2(50) PRIMARY KEY,
+	PWD		VARCHAR2(20) NOT NULL,
+	NAME	VARCHAR2(50) NOT NULL,
+	POINT	NUMBER		 CHECK( POINT > 1000),
+	DEPT	VARCHAR2(50) CHECK( DEPT IN('AI', 'INSA', 'SB', 'EMART'))
+);
 
+INSERT INTO INTERN_USER_TBL
+VALUES ('jslim', 'jslim', '임정섭', 2000, 'SB');
 
-
+SELECT * FROM INTERN_USER_TBL;
 
 
 
