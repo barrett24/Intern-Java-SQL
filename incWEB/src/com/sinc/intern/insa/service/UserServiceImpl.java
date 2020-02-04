@@ -20,8 +20,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public List<Object> select() {
-		// TODO Auto-generated method stub
-		return null;
+		System.out.println("UserService list");
+		return dao.selectRow(); 
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.sinc.intern.insa.model.vo.UserDTO;
 import com.sinc.intern.insa.service.UserService;
@@ -29,7 +30,21 @@ public class LoginCtrl implements Controller {
 		UserDTO dto = new UserDTO(id, pwd);
 		Object user = service.select(dto);
 		System.out.println("Ctrl result user : "+ user);
-		return null;
+		ModelAndView mv = new ModelAndView();
+		
+		if (user != null) {
+			//mv.setSend(true);
+			//mv.setPath("ok.jsp");
+			//mv.setPath("main.jsp");
+			mv.setSend(false);
+			mv.setPath("index.jsp");
+			HttpSession session = request.getSession();
+			session.setAttribute("loginSession", user);
+		} else {
+			mv.setSend(false);
+			mv.setPath("error.jsp");
+		}
+		return mv;
 	}
 	
 }

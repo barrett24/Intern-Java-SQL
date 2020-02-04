@@ -661,7 +661,8 @@ VALUES ('jslim', 'jslim', '임정섭', 2000, 'SB');
 
 SELECT * FROM INTERN_USER_TBL;
 
-
+INSERT INTO INTERN_USER_TBL
+VALUES ('sy', 'sy', '최시영', 2000, 'AI');
 
 
 
